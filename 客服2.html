@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <title>企业资源共享平台</title>
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
+            background-color: #f9fafb;
+            color: #333;
+            line-height: 1.6;
+        }
+        a {
+            text-decoration: none;
+        }
+        button {
+            cursor: pointer;
+            border: none;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .container {
+            width: 100%;
+            padding: 0 15px;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+
+        /* 标题样式 */
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+            padding: 30px 0;
+            color: #2d3748;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: #3182ce;
+        }
+
+        /* 卡片通用样式 */
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .card-body {
+            padding: 24px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        /* 介绍卡片样式 */
+        .intro-card {
+            border-left: 4px solid #3182ce;
+            margin-bottom: 30px;
+            background-color: #f7fafc;
+        }
+        .intro-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3182ce;
+            color: white;
+            margin-right: 12px;
+        }
+        .intro-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .buy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #3182ce;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        .buy-btn:hover {
+            background-color: #2b6cb0;
+            transform: translateY(-2px);
+        }
+
+        /* 轮播图样式 */
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            height: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .slideshow-slide {
+            display: none;
+            height: 100%;
+        }
+        .slideshow-slide.block {
+            display: block;
+        }
+        .slideshow-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* 翻页按钮 */
+        .slideshow-prev, .slideshow-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(49, 130, 206, 0.8);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .slideshow-prev {
+            left: 20px;
+        }
+        .slideshow-next {
+            right: 20px;
+        }
+        .slideshow-prev:hover, .slideshow-next:hover {
+            background-color: #2b6cb0;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .slideshow-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        .slideshow-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .slideshow-dot.active {
+            background-color: white;
+            transform: scale(1.3);
+        }
+
+        /* 步骤卡片样式 - 增强区分度 */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        /* 每个步骤使用不同的左侧标识色，增强区分度 */
+        .step-card.step-1 {
+            border-left: 4px solid #3182ce;
+        }
+        .step-card.step-2 {
+            border-left: 4px solid #38a169;
+        }
+        .step-card.step-3 {
+            border-left: 4px solid #ecc94b;
+        }
+        .step-card.step-4 {
+            border-left: 4px solid #ed64a6;
+        }
+        
+        .step-card {
+            padding: 0;
+            position: relative;
+            background-color: #fff;
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: white;
+            text-align: center;
+            line-height: 36px;
+            font-size: 18px;
+            margin-right: 16px;
+            flex-shrink: 0;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        /* 步骤编号使用对应颜色 */
+        .step-1 .step-number {
+            background-color: #3182ce;
+        }
+        .step-2 .step-number {
+            background-color: #38a169;
+        }
+        .step-3 .step-number {
+            background-color: #ecc94b;
+        }
+        .step-4 .step-number {
+            background-color: #ed64a6;
+        }
+        
+        .step-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f1f5f9;
+            width: 100%;
+        }
+
+        /* 关键词按钮样式 */
+        .keyword-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .keyword-btn {
+            background-color: #f1f5f9;
+            padding: 10px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            color: #333;
+            border: 1px solid #e2e8f0;
+            font-weight: 500;
+        }
+        .keyword-btn:hover {
+            background-color: #ebf8ff;
+            border-color: #90cdf4;
+            color: #2b6cb0;
+            transform: translateY(-2px);
+        }
+
+        /* 悬浮客服按钮 */
+        .mini-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #3182ce;
+            color: white;
+            border-radius: 36px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(49, 130, 206, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 16px;
+            border: none;
+        }
+        .mini-btn:hover {
+            background-color: #2b6cb0;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.5);
+        }
+        .mini-btn i {
+            font-size: 22px;
+            margin-right: 12px;
+            background-color: rgba(255,255,255,0.15);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 聊天窗口样式 */
+        .chat-window {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 100%;
+            max-width: 420px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.15);
+            z-index: 1000;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .chat-header {
+            background-color: #3182ce;
+            color: white;
+            padding: 0 20px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .chat-content {
+            height: 360px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f8fafc;
+        }
+        .chat-input-area {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .chat-input:focus {
+            border-color: #3182ce;
+        }
+        /* 上传图片按钮 */
+        .upload-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            background-color: #f1f5f9;
+            color: #3182ce;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: all 0.3s;
+            border: 1px solid #e2e8f0;
+        }
+        .upload-btn:hover {
+            background-color: #ebf8ff;
+            transform: scale(1.05);
+            border-color: #90cdf4;
+        }
+        .send-btn {
+            background-color: #3182ce;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .send-btn:hover {
+            background-color: #2b6cb0;
+            transform: translateY(-2px);
+        }
+        .chat-platform-btns {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+        }
+        .platform-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .platform-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .weixin-btn {
+            background: linear-gradient(135deg, #07C160, #00A86B);
+        }
+        .weibo-btn {
+            background: linear-gradient(135deg, #E6162D, #F5222D);
+        }
+        .linkedin-btn {
+            background: linear-gradient(135deg, #0077B5, #0066A2);
+        }
+
+        /* 聊天消息样式 */
+        .message {
+            margin-bottom: 18px;
+            display: flex;
+            max-width: 100%;
+        }
+        .message.left {
+            justify-content: flex-start;
+        }
+        .message.right {
+            justify-content: flex-end;
+        }
+        .avatar-container {
+            position: relative; /* 关键：确保绿点相对于头像定位 */
+            margin-right: 12px;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        /* 在线状态绿点 - 正确跟随头像 */
+        .online-dot {
+            position: absolute;
+            bottom: -2px;
+            right: -2px; /* 紧贴头像右下角 */
+            width: 14px;
+            height: 14px;
+            background-color: #22c55e;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3);
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .message.left .message-content {
+            background-color: white;
+            border-radius: 6px 16px 16px 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+        }
+        .message.right .message-content {
+            background-color: #ebf8ff;
+            border-radius: 16px 6px 16px 16px;
+            border: 1px solid #bfdbfe;
+        }
+        .message-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .online-status {
+            font-size: 12px;
+            color: #22c55e;
+            background-color: rgba(34, 197, 94, 0.1);
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .modal-btn {
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .cancel-btn {
+            background-color: #f1f5f9;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+        .cancel-btn:hover {
+            background-color: #e2e8f0;
+        }
+        .confirm-btn {
+            background-color: #3182ce;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .confirm-btn:hover {
+            background-color: #2b6cb0;
+        }
+
+        /* 复制提示样式 */
+        .copy-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            z-index: 9999;
+            font-size: 14px;
+            animation: fadeIn 0.3s;
+        }
+        .copy-popup.show {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -55%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .slideshow-container {
+                height: 280px;
+            }
+            .slideshow-prev, .slideshow-next {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+            .page-title {
+                font-size: 24px;
+                padding: 20px 0;
+            }
+            .card-body {
+                padding: 18px;
+            }
+            .chat-window {
+                max-width: calc(100% - 30px);
+            }
+            .mini-btn {
+                padding: 14px 20px;
+                font-size: 14px;
+            }
+            .mini-btn i {
+                width: 32px;
+                height: 32px;
+                font-size: 18px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <!-- 页面标题 -->
+    <h1 class="page-title">企业资源共享平台</h1>
+
+    <!-- 主内容容器 -->
+    <div class="container">
+        <!-- 介绍卡片 -->
+        <div class="card intro-card">
+            <div class="card-body">
+                <div class="intro-header">
+                    <div class="intro-icon">
+                        <i class="fa fa-building"></i>
+                    </div>
+                    <h2 class="card-title">企业资源获取指南</h2>
+                </div>
+                <div class="intro-content">
+                    <p class="font-bold mb-4 text-lg">我们为企业提供各类优质资源，包括行业报告、市场分析、营销素材、管理工具等，助力企业高效运营。</p>
+                    <p class="mb-4 text-gray-700">
+                        <span style="color: #dc2626; font-weight: 500;">资源整理不易，为持续提供高质量内容，我们设置了简单的支持任务（约30秒即可完成）<br>
+                        <span style="color: #7c3aed; font-weight: 500;">完成任务后可获取全部资源访问权限，包括独家内容和定期更新服务！</span><br>
+                        <span style="color: #b91c1c; font-weight: 500;">
+                            <span style="color: #2b6cb0;">企业用户</span>
+                            <span> 可选择直接购买永久权限，享受更优质的专属服务</span>
+                        </span>
+                        </span>
+                    </p>
+                    <div>
+                        <a href="#" class="buy-btn" target="_blank">
+                            <i class="fa fa-shopping-cart"></i>
+                            企业版购买
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图片轮播 -->
+        <div class="slideshow-container">
+            <div class="slideshow-slide block">
+                <img src="https://picsum.photos/id/20/1200/400" onclick="showTaskTip()" alt="企业资源展示图1">
+            </div>
+            <div class="slideshow-slide">
+                <img src="https://picsum.photos/id/21/1200/400" onclick="showTaskTip()" alt="企业资源展示图2">
+            </div>
+            <div class="slideshow-slide">
+                <img src="https://picsum.photos/id/22/1200/400" onclick="showTaskTip()" alt="企业资源展示图3">
+            </div>
+            <!-- 翻页按钮 -->
+            <a class="slideshow-prev" onclick="changeSlide(-1)">❮</a>
+            <a class="slideshow-next" onclick="changeSlide(1)">❯</a>
+            <div class="slideshow-dots">
+                <span class="slideshow-dot active" onclick="currentSlide(1)"></span>
+                <span class="slideshow-dot" onclick="currentSlide(2)"></span>
+                <span class="slideshow-dot" onclick="currentSlide(3)"></span>
+            </div>
+        </div>
+
+        <!-- 步骤说明 - 使用不同颜色增强区分度 -->
+        <div class="steps-container">
+            <!-- 第一步 -->
+            <div class="card step-card step-1">
+                <div class="card-body">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <h3 class="step-title">选择平台</h3>
+                    </div>
+                    <div class="step-content">
+                        <p class="mb-4 text-gray-700">打开企业社交平台【LinkedIn/微信企业号/行业论坛】，搜索以下关键词</p>
+                        <div class="keyword-container">
+                            <span class="keyword-btn" onclick="copyKeyword('企业资源共享')">企业资源共享</span>
+                            <span class="keyword-btn" onclick="copyKeyword('行业报告下载')">行业报告下载</span>
+                            <span class="keyword-btn" onclick="copyKeyword('企业管理工具')">企业管理工具</span>
+                            <span class="keyword-btn" onclick="copyKeyword('营销素材库')">营销素材库</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二步 -->
+            <div class="card step-card step-2">
+                <div class="card-body">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <h3 class="step-title">分享内容</h3>
+                    </div>
+                    <div class="step-content">
+                        <p class="mb-4 text-gray-700">复制以下任意一条文案，在相关内容下评论或发布</p>
+                        <div class="keyword-container">
+                            <span class="keyword-btn" onclick="copyKeyword('这个企业资源平台很实用，推荐给同行')">这个企业资源平台很实用，推荐给同行</span>
+                            <span class="keyword-btn" onclick="copyKeyword('资源质量很高，对企业发展很有帮助')">资源质量很高，对企业发展很有帮助</span>
+                            <span class="keyword-btn" onclick="copyKeyword('感谢分享这么优质的行业资源')">感谢分享这么优质的行业资源</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第三步 -->
+            <div class="card step-card step-3">
+                <div class="card-body">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <h3 class="step-title">截图证明</h3>
+                    </div>
+                    <div class="step-content">
+                        <p class="mb-4 text-gray-700">
+                            <strong>完成分享后，截取包含你评论的页面截图（需清晰可见）<br>
+                            至少需要3张不同位置的分享截图</strong>
+                        </p>
+                        <p class="font-bold text-primary mb-4">👇示例截图👇</p>
+                        <img src="https://picsum.photos/id/23/1200/400" alt="示例截图" class="rounded-lg border border-gray-200 shadow-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 最后一步 -->
+            <div class="card step-card step-4">
+                <div class="card-body">
+                    <div class="step-header">
+                        <div class="step-number">4</div>
+                        <h3 class="step-title">提交审核</h3>
+                    </div>
+                    <div class="step-content">
+                        <p class="mb-4 text-gray-700">
+                            <strong>将你完成的3张分享截图发送给右下角的
+                            <span class="text-primary">企业客服机器人</span><br><br>
+                            机器人会在10秒内审核，审核通过后会自动发送资源访问链接<br><br>
+                            <span class="text-primary">注意：不清晰的截图或重复截图将无法通过审核</span></strong>
+                        </p>
+                        
+                        <!-- 示例轮播 -->
+                        <div class="slideshow-container mb-4">
+                            <div class="slideshow-slide block">
+                                <img src="https://picsum.photos/id/24/1200/400" alt="完成示例1">
+                            </div>
+                            <div class="slideshow-slide">
+                                <img src="https://picsum.photos/id/25/1200/400" alt="完成示例2">
+                            </div>
+                            <a class="slideshow-prev" onclick="slideReward(-1)">❮</a>
+                            <a class="slideshow-next" onclick="slideReward(1)">❯</a>
+                            <div class="slideshow-dots">
+                                <span class="slideshow-dot active" onclick="currentRewardSlide(0)"></span>
+                                <span class="slideshow-dot" onclick="currentRewardSlide(1)"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 悬浮客服按钮 -->
+    <div class="mini-btn" id="chatBtn" onclick="showChatWindow()">
+        <i class="fa fa-comments"></i>
+        <span>企业客服机器人</span>
+    </div>
+
+    <!-- AI聊天窗口 -->
+    <div class="chat-window" id="chatWindow">
+        <!-- 聊天头部 -->
+        <div class="chat-header">
+            <div class="chat-header-content">
+                <div class="avatar-container">
+                    <img src="https://picsum.photos/id/25/100/100" alt="企业客服头像" class="avatar">
+                    <span class="online-dot pulse-animation"></span>
+                </div>
+                <div>
+                    <div class="font-bold">企业客服助手</div>
+                    <div class="text-sm flex items-center gap-1">
+                        <span class="online-dot" style="width: 6px; height: 6px;"></span>
+                        在线中
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="showEditProfile()" style="background: transparent; color: white;">
+                    <i class="fa fa-user-o"></i>
+                </button>
+                <button onclick="hideChatWindow()" style="background: transparent; color: white;">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 聊天内容 -->
+        <div class="chat-content" id="chatContent">
+            <!-- 初始消息 -->
+            <div class="message left">
+                <div class="avatar-container">
+                    <img src="https://picsum.photos/id/25/100/100" alt="企业客服头像" class="avatar">
+                    <span class="online-dot pulse-animation"></span>
+                </div>
+                <div class="message-content">
+                    <div class="message-info">
+                        <span class="font-bold">企业客服助手</span>
+                        <span class="online-status">在线中</span>
+                    </div>
+                    <p>您好！请上传3张分享截图，我会为您审核。审核通过后将发送企业资源访问链接。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="chat-input-area">
+            <input type="file" id="imageInput" accept="image/*" multiple style="display: none;" onchange="handleImageUpload(this)">
+            <button class="upload-btn" onclick="document.getElementById('imageInput').click()">
+                <i class="fa fa-picture-o"></i>
+            </button>
+            <input type="text" class="chat-input" placeholder="请上传截图..." readonly>
+            <button class="send-btn" onclick="sendMessage()">
+                <span>发送</span>
+                <i class="fa fa-paper-plane"></i>
+            </button>
+        </div>
+
+        <!-- 平台按钮 -->
+        <div class="chat-platform-btns">
+            <button class="platform-btn weixin-btn" onclick="openPlatform('weixin')">
+                <i class="fa fa-weixin"></i>
+                <span>微信</span>
+            </button>
+            <button class="platform-btn weibo-btn" onclick="openPlatform('weibo')">
+                <i class="fa fa-weibo"></i>
+                <span>微博</span>
+            </button>
+            <button class="platform-btn linkedin-btn" onclick="openPlatform('linkedin')">
+                <i class="fa fa-linkedin"></i>
+                <span>领英</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 编辑个人信息弹窗 -->
+    <div class="modal" id="editProfileModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="stopPropagation(event)">
+            <div class="modal-header">
+                <h3 class="modal-title">编辑企业信息</h3>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label style="display: block; margin-bottom: 8px; color: #666;">企业Logo</label>
+                    <div class="flex items-center gap-4">
+                        <img id="previewAvatar" src="https://picsum.photos/id/64/100/100" alt="企业Logo预览" style="width: 60px; height: 60px; border-radius: 4px;">
+                        <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
+                        <button class="keyword-btn" onclick="document.getElementById('avatarUpload').click()">选择图片</button>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label style="display: block; margin-bottom: 8px; color: #666;">企业名称</label>
+                    <input type="text" id="nicknameInput" placeholder="请输入企业名称" class="chat-input" style="width: 100%;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeEditProfile()">取消</button>
+                <button class="modal-btn confirm-btn" onclick="saveProfile()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 复制提示 -->
+    <div class="copy-popup" id="copyPopup">内容已复制到剪贴板</div>
+
+    <!-- 核心功能脚本 -->
+    <script>
+        // 全局变量
+        let currentSlideIndex = 1;
+        let currentRewardIndex = 0;
+        let imageCount = 0;
+        let userAvatar = "https://picsum.photos/id/64/100/100";
+        let userName = "企业用户";
+
+        // 页面加载完成初始化
+        window.onload = function() {
+            showSlides(currentSlideIndex);
+            showRewardSlides(currentRewardIndex);
+        };
+
+        // 轮播图控制
+        function changeSlide(n) {
+            showSlides(currentSlideIndex += n);
+        }
+        function currentSlide(n) {
+            showSlides(currentSlideIndex = n);
+        }
+        function showSlides(n) {
+            let slides = document.getElementsByClassName("slideshow-slide");
+            let dots = document.getElementsByClassName("slideshow-dot");
+            
+            // 只处理顶部轮播（前3张）
+            const mainSlidesCount = 3;
+            if (n > mainSlidesCount) currentSlideIndex = 1;
+            if (n < 1) currentSlideIndex = mainSlidesCount;
+            
+            for (let i = 0; i < mainSlidesCount; i++) {
+                slides[i].style.display = "none";
+                dots[i].classList.remove("active");
+            }
+            
+            slides[currentSlideIndex - 1].style.display = "block";
+            dots[currentSlideIndex - 1].classList.add("active");
+        }
+
+        // 示例轮播控制
+        function slideReward(n) {
+            showRewardSlides(currentRewardIndex += n);
+        }
+        function currentRewardSlide(n) {
+            showRewardSlides(currentRewardIndex = n);
+        }
+        function showRewardSlides(n) {
+            let slides = document.getElementsByClassName("slideshow-slide");
+            let dots = document.getElementsByClassName("slideshow-dot");
+            
+            // 只处理示例轮播（后2张）
+            const rewardStartIndex = 3;
+            const rewardDotsStartIndex = 3;
+            const rewardSlidesCount = 2;
+            
+            if (n >= rewardSlidesCount) currentRewardIndex = 0;
+            if (n < 0) currentRewardIndex = rewardSlidesCount - 1;
+            
+            for (let i = rewardStartIndex; i < rewardStartIndex + rewardSlidesCount; i++) {
+                slides[i].style.display = "none";
+                dots[i].classList.remove("active");
+            }
+            
+            slides[rewardStartIndex + currentRewardIndex].style.display = "block";
+            dots[rewardDotsStartIndex + currentRewardIndex].classList.add("active");
+        }
+
+        // 复制功能
+        function copyKeyword(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text)
+                    .then(() => showCopyTip())
+                    .catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+        }
+        function fallbackCopy(text) {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            showCopyTip();
+        }
+        function showCopyTip() {
+            const popup = document.getElementById("copyPopup");
+            popup.classList.add("show");
+            setTimeout(() => popup.classList.remove("show"), 2000);
+            
+            // 震动反馈
+            if (navigator.vibrate) navigator.vibrate(200);
+        }
+
+        // 任务提示
+        function showTaskTip() {
+            alert("请按照页面中的步骤完成任务，然后将截图发送给企业客服机器人审核");
+        }
+
+        // 聊天窗口控制
+        function showChatWindow() {
+            document.getElementById("chatWindow").style.display = "block";
+            resetChat();
+        }
+        function hideChatWindow() {
+            document.getElementById("chatWindow").style.display = "none";
+        }
+
+        // 图片上传处理
+        function handleImageUpload(input) {
+            if (input.files.length === 0) return;
+            
+            for (let i = 0; i < input.files.length; i++) {
+                const file = input.files[i];
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        addUserMessage("", e.target.result);
+                        imageCount++;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            
+            setTimeout(checkImageCount, 1000);
+            input.value = "";
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const input = document.getElementById("imageInput");
+            if (input.files.length === 0) {
+                addBotMessage("请先选择图片再发送");
+                return;
+            }
+            handleImageUpload(input);
+        }
+
+        // 添加聊天消息
+        function addUserMessage(text, imageUrl) {
+            const chatContent = document.getElementById("chatContent");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = "message right";
+            
+            let content = "";
+            if (imageUrl) {
+                content = `
+                    <div class="message-content">
+                        <img src="${imageUrl}" alt="用户上传的图片" style="border-radius: 4px; max-height: 140px; width: 100%;">
+                    </div>
+                `;
+            }
+            
+            messageDiv.innerHTML = content;
+            chatContent.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function addBotMessage(text) {
+            const chatContent = document.getElementById("chatContent");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = "message left";
+            
+            messageDiv.innerHTML = `
+                <div class="avatar-container">
+                    <img src="https://picsum.photos/id/25/100/100" alt="企业客服头像" class="avatar">
+                    <span class="online-dot pulse-animation"></span>
+                </div>
+                <div class="message-content">
+                    <div class="message-info">
+                        <span class="font-bold">企业客服助手</span>
+                        <span class="online-status">在线中</span>
+                    </div>
+                    <p>${text}</p>
+                </div>
+            `;
+            
+            chatContent.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // 检查图片数量
+        function checkImageCount() {
+            if (imageCount >= 3) {
+                addBotMessage("已通过，感谢您的支持！企业资源访问链接：https://example.com/enterprise-resources");
+            } else {
+                addBotMessage(`您目前已上传 ${imageCount} 张图片，请再上传 ${3 - imageCount} 张图片以完成审核。`);
+            }
+        }
+
+        // 滚动到聊天底部
+        function scrollToBottom() {
+            const chatContent = document.getElementById("chatContent");
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        // 重置聊天
+        function resetChat() {
+            const chatContent = document.getElementById("chatContent");
+            chatContent.innerHTML = `
+                <div class="message left">
+                    <div class="avatar-container">
+                        <img src="https://picsum.photos/id/25/100/100" alt="企业客服头像" class="avatar">
+                        <span class="online-dot pulse-animation"></span>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-info">
+                            <span class="font-bold">企业客服助手</span>
+                            <span class="online-status">在线中</span>
+                        </div>
+                        <p>您好！请上传3张分享截图，我会为您审核。审核通过后将发送企业资源访问链接。</p>
+                    </div>
+                </div>
+            `;
+            imageCount = 0;
+            document.getElementById("imageInput").value = "";
+        }
+
+        // 企业信息编辑
+        function showEditProfile() {
+            document.getElementById("editProfileModal").style.display = "flex";
+            document.getElementById("nicknameInput").value = userName;
+        }
+        function closeEditProfile() {
+            document.getElementById("editProfileModal").style.display = "none";
+        }
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById("previewAvatar").src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function saveProfile() {
+            const newName = document.getElementById("nicknameInput").value.trim();
+            if (newName) userName = newName;
+            
+            // 更新企业Logo
+            const avatarInput = document.getElementById("avatarUpload");
+            if (avatarInput.files && avatarInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userAvatar = e.target.result;
+                };
+                reader.readAsDataURL(avatarInput.files[0]);
+            }
+            
+            closeEditProfile();
+            addBotMessage("企业信息保存成功！");
+        }
+
+        // 模态框点击事件
+        function closeModal(event) {
+            if (event.target === document.getElementById("editProfileModal")) {
+                closeEditProfile();
+            }
+        }
+        function stopPropagation(event) {
+            event.stopPropagation();
+        }
+
+        // 打开平台
+        function openPlatform(platform) {
+            const tips = {
+                weixin: "将打开微信企业号",
+                weibo: "将打开微博平台",
+                linkedin: "将打开LinkedIn平台"
+            };
+            alert(tips[platform]);
+        }
+    </script>
+</body>
+</html>
