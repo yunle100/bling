@@ -2,262 +2,405 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 引入 blueimp-md5 库 -->
-    <script src="https://cdn.jsdelivr.net/npm/blueimp-md5/js/md5.min.js"></script>
-    <!-- 引入FontAwesome图标库 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <title>源码购买 - 单页成交</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>悬浮支付</title>
     <style>
-        /* 基础样式 */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            position: relative;
+        }
+        
+        /* 页面加载动画 */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            margin: 20px auto;
+            height: 100%;
+            background: transparent; /* 透明背景 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 主内容区域 - 初始隐藏 */
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .main-content.visible {
+            opacity: 1;
+        }
+        
+        /* 背景图容器 */
+        .background-container {
+            position: relative;
+            width: 100%;
+            min-height: 100%;
+        }
+        
+        /* 背景图样式 */
+        .background-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            pointer-events: none; /* 禁止单独点开图片 */
+        }
+        
+        /* 顶部轮播弹窗 */
+        .top-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6); /* 更加透明的黑色背景 */
+            border-radius: 10px;
+            padding: 15px 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            max-width: 85%;
             text-align: center;
+            color: white;
+            animation: slideDown 0.5s ease-out;
+            min-width: 300px;
         }
-        .product-image {
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
         }
-        .product-info {
-            margin-bottom: 20px;
-        }
-        .product-info p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #666;
-        }
-        .product-info .price {
-            font-size: 28px;
-            color: #e74c3c;
+        
+        .top-notification .user-name {
+            color: #fff;
             font-weight: bold;
         }
-        .product-info .original-price {
-            font-size: 14px;
-            color: #999;
-            text-decoration: line-through;
-            margin-left: 10px;
-        }
-        .product-info .discount {
-            font-size: 14px;
-            color: #e74c3c;
-            margin-left: 10px;
-        }
-        .product-info .rating {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .product-info .rating span {
-            font-size: 14px;
-            color: #666;
-            margin-right: 10px;
-        }
-        .product-info .rating .stars {
-            color: #ffc107;
-        }
-        .product-info .sales {
-            font-size: 14px;
-            color: #666;
-            margin-top: 10px;
-        }
-        .interaction {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .interaction button {
-            background-color: transparent;
-            border: none;
-            color: #666;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-        .interaction button:hover {
-            color: #3498db;
-        }
-        .interaction button i {
-            margin-right: 5px;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .comments {
-            margin-top: 20px;
-        }
-        .comments h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        .comment {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .comment img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        .comment p {
-            margin: 0;
-            font-size: 14px;
-            color: #333;
-        }
-        .btn {
-            background-color: #3498db;
+        
+        .top-notification .payment-info {
             color: #fff;
-            padding: 15px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            width: 100%;
-            display: block;
-            text-align: center;
-        }
-        .btn:hover {
-            background-color: #2980b9;
-        }
-        .tips {
             font-size: 14px;
-            color: #999;
-            margin-top: 20px;
         }
-        .tips p {
-            margin: 5px 0;
+        
+        /* 长条悬浮支付按钮 */
+        .floating-pay-button {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 22px 0;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.5), 
+                        0 5px 15px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80%;
+            max-width: 500px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+            overflow: hidden;
         }
-        .paid-content {
-            display: none; /* 默认隐藏付费内容 */
-            margin-top: 20px;
-            background-color: bisque;
+        
+        /* 脉冲动画 */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 15px 35px rgba(255, 107, 107, 0.5), 
+                            0 5px 15px rgba(0, 0, 0, 0.3),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 20px 45px rgba(255, 107, 107, 0.7), 
+                            0 8px 25px rgba(0, 0, 0, 0.4),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+            100% {
+                box-shadow: 0 15px 35px rgba(255, 107, 107, 0.5), 
+                            0 5px 15px rgba(0, 0, 0, 0.3),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
         }
-        .paid-content a {
-            color: #3498db;
-            text-decoration: none;
+        
+        /* 按钮悬停效果 */
+        .floating-pay-button:hover {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            transform: translateX(-50%) translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(255, 107, 107, 0.6), 
+                        0 12px 30px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            animation: none;
         }
-        .paid-content a:hover {
-            text-decoration: underline;
+        
+        /* 按钮点击效果 */
+        .floating-pay-button:active {
+            transform: translateX(-50%) translateY(-2px) scale(0.98);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4), 
+                        0 3px 10px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.1s ease;
+        }
+        
+        /* 防止图片被长按保存 */
+        .background-image {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .floating-pay-button {
+                padding: 20px 0;
+                font-size: 20px;
+                width: 80%;
+            }
+            
+            .top-notification {
+                max-width: 90%;
+                padding: 12px 25px;
+                min-width: 250px;
+            }
+            
+            .loader {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        /* 超小屏幕优化 */
+        @media (max-width: 360px) {
+            .floating-pay-button {
+                padding: 18px 0;
+                font-size: 18px;
+            }
+            
+            .top-notification {
+                padding: 10px 20px;
+                min-width: 200px;
+            }
+            
+            .loader {
+                width: 40px;
+                height: 40px;
+            }
         }
     </style>
+    <!-- 引入FontAwesome图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- 引入 blueimp-md5 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/blueimp-md5/js/md5.min.js"></script>
+    <!-- 引入jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>源码购买</h1>
-        <!-- 商品主图 -->
-        <img src="https://www.aihub.cn/wp-content/uploads/2023/12/image-170.png" alt="商品主图" class="product-image">
-        <!-- 商品信息 -->
-        <div class="product-info">
-            <p><strong>源码名称：</strong>某某系统源码</p>
-            <p><strong>版本：</strong>完整版</p>
-            <div class="price">
-                ￥50.00
-                <span class="original-price">￥100.00</span>
-                <span class="discount">5折</span>
-            </div>
-            <div class="rating">
-                <span>评分：</span>
-                <div class="stars">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
-                </div>
-            </div>
-            <div class="sales">已售：<span id="salesCount">1234</span>件</div>
+    <!-- 页面加载动画 -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+    </div>
+    
+    <!-- 主内容区域 -->
+    <div class="main-content" id="mainContent">
+        <!-- 顶部轮播弹窗 -->
+        <div id="topNotification" class="top-notification" style="display: none;">
+            <span class="user-name" id="userName"></span>
+            <span class="payment-info"> 刚刚支付了5.99元</span>
         </div>
-        <!-- 互动按钮 -->
-        <div class="interaction">
-            <button id="shareButton"><i class="fas fa-share-alt"></i>转发</button>
-            <button id="commentButton"><i class="fas fa-comment"></i>评论</button>
-            <button id="favoriteButton"><i class="fas fa-heart"></i>收藏</button>
-        </div>
-        <!-- 统计数据 -->
-        <div class="stats">
-            <span>已买数量：<span id="purchasedCount">1234</span></span>
-            <span>收藏数量：<span id="favoriteCount">567</span></span>
-        </div>
-        <!-- 支付按钮 -->
-        <button class="btn" id="payButton">立即支付</button>
         
-        <!-- 付费内容 -->
-        <div class="paid-content" id="paidContent">
-            <h3>付费内容</h3>
-            <p>感谢您的购买！以下是您的下载链接：</p>
-            <p><a href="https://example.com/download" target="_blank">点击下载源码</a></p>
+        <!-- 背景图容器 -->
+        <div class="background-container">
+            <img src="https://img.alicdn.com/imgextra/i2/3994676485/O1CN01PQRPww1xmBa3HzbST_!!3994676485-0-ampmedia.jpg" 
+                 alt="背景图" 
+                 class="background-image"
+                 id="backgroundImage">
         </div>
-
-        <!-- 评论区域 -->
-        <div class="comments">
-            <h3>用户评论</h3>
-            <div class="comment">
-                <img src="https://a.520gexing.com/uploads/allimg/2021042109/uqaqhuvavt0.jpg" alt="用户头像">
-                <p>软件好哦用</p>
-            </div>
-        </div>
-        <!-- 温馨提示 -->
-        <div class="tips">
-            <p>温馨提示：</p>
-            <p>1. 本源码包含原始水印，需自行修改。</p>
-            <p>2. 支付成功后，源码将自动发送至您的邮箱。</p>
-            <p>3. 如有问题，请联系客服。</p>
-        </div>
+        
+        <!-- 长条悬浮支付按钮 -->
+        <button class="floating-pay-button" id="payButton">
+            立即支付
+        </button>
     </div>
 
     <script>
-        // 检查是否已支付
-        const isPaid = localStorage.getItem("isPaid");
-
-        // 如果已支付，显示付费内容
-        // if (isPaid) {
-        //     document.getElementById("paidContent").style.display = "block";
-        //     document.getElementById("payButton").style.display = "none";
-        // }
-
-        // 易支付接口配置
-        const payConfig = {
-            apiUrl: "https://pay.mymzf.com/xpay/epay/submit.php", // 易支付接口地址
-            pid: "12039", // 商户ID
-            key: "6iuiMChpcaEaRIOOdPHO", // API密钥
-            type: "wxpay", // 支付方式
-            notify_url: "http://127.0.0.1:5500/good.php", // 异步通知地址
-            return_url: "http://127.0.0.1:5500/good.html", // 跳转通知地址
-            name: "某某系统源码", // 商品名称
-            money: "0.01", // 商品金额
-            param: "", // 业务扩展参数
-            sign_type: "MD5", // 签名类型
+        // 加密配置信息
+        const encryptedConfig = {
+            pid: "MTA0NDQ=",
+            key: "TEE1czROdHJrQm1LeFNZbkZQeEo=",
+            apiUrl: "https://xarr.haofon.com/xpay/epay/submit.php",
+            type: "wxpay",
+            notify_url: "http://baidu.com",
+            return_url: "http://bilibili.com",
+            name: "男女表情包",
+            money: "5.99",
+            param: "",
+            sign_type: "MD5"
         };
+
+        // Base64解码函数
+        function base64Decode(str) {
+            try {
+                // 标准Base64解码
+                return decodeURIComponent(escape(atob(str)));
+            } catch (e) {
+                console.error('Base64解码失败:', e);
+                return str; // 如果解码失败，返回原字符串
+            }
+        }
+
+        // 获取解密后的配置
+        function getDecryptedConfig() {
+            return {
+                apiUrl: encryptedConfig.apiUrl,
+                pid: base64Decode(encryptedConfig.pid),
+                key: base64Decode(encryptedConfig.key),
+                type: encryptedConfig.type,
+                notify_url: encryptedConfig.notify_url,
+                return_url: encryptedConfig.return_url,
+                name: encryptedConfig.name,
+                money: encryptedConfig.money,
+                param: encryptedConfig.param,
+                sign_type: encryptedConfig.sign_type
+            };
+        }
+
+        // 页面加载管理
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const mainContent = document.getElementById('mainContent');
+            const backgroundImage = document.getElementById('backgroundImage');
+            
+            // 等待背景图片加载完成
+            if (backgroundImage.complete) {
+                onImageLoaded();
+            } else {
+                backgroundImage.addEventListener('load', onImageLoaded);
+                backgroundImage.addEventListener('error', onImageLoaded); // 即使出错也继续
+            }
+            
+            // 设置最长等待时间（5秒）
+            setTimeout(onImageLoaded, 5000);
+            
+            function onImageLoaded() {
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                    mainContent.classList.add('visible');
+                    
+                    // 确保图片加载完成后调整容器高度
+                    const img = document.querySelector('.background-image');
+                    const container = document.querySelector('.background-container');
+                    if (img && container) {
+                        container.style.height = img.offsetHeight + 'px';
+                    }
+                }, 300);
+            }
+        });
+
+        // 禁止缩放
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('touchmove', function(e) {
+            if(e.scale !== 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // 禁止图片长按保存
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // 用户名称数组
+        var names = ["弘毅","李涛","豪哥","海阔天空","博文","小七","吴哥","丰富","格局","天天歌","三个七","晴天","黑羽","(宝ᴗ宝)"];
+        var names_count = names.length;
+        var names_i = 0;
+        
+        // 轮播显示用户支付信息
+        function showUserPayment() {
+            if(names_i == names_count-1){
+                names_i = 0;
+            }else{
+                names_i = names_i + 1;
+            }
+            
+            var tmp_name = names[names_i];
+            $("#userName").text(tmp_name + "***");
+            
+            // 显示弹窗
+            $("#topNotification").fadeIn(500);
+            
+            // 3秒后隐藏
+            setTimeout(function(){
+                $("#topNotification").fadeOut(500);
+            }, 3000);
+        }
+        
+        // 每3.5秒显示一次（包含显示和隐藏时间）
+        setInterval(showUserPayment, 3500);
+        
+        // 页面加载后立即显示一次
+        setTimeout(showUserPayment, 1000);
 
         // 生成随机订单号
         function generateOrderId() {
             return "order_" + Math.random().toString(36).substr(2, 9);
         }
-
 
         // 生成签名
         function generateSign(params, key) {
@@ -282,6 +425,9 @@
 
         // 发起支付请求（GET 方式）
         function initiatePayment() {
+            // 获取解密后的配置
+            const payConfig = getDecryptedConfig();
+            
             const orderId = generateOrderId();
             const params = {
                 pid: payConfig.pid,
@@ -307,26 +453,6 @@
 
         // 绑定支付按钮点击事件
         document.getElementById("payButton").addEventListener("click", initiatePayment);
-
-        // 转发按钮点击事件
-        document.getElementById("shareButton").addEventListener("click", function () {
-            alert("已复制链接，快去分享吧！");
-            // 这里可以添加实际的分享逻辑，例如复制链接到剪贴板
-        });
-
-        // 评论按钮点击事件
-        document.getElementById("commentButton").addEventListener("click", function () {
-            alert("跳转到评论页面！");
-            // 这里可以跳转到评论页面或弹出评论框
-        });
-
-        // 收藏按钮点击事件
-        document.getElementById("favoriteButton").addEventListener("click", function () {
-            const favoriteCount = document.getElementById("favoriteCount");
-            let count = parseInt(favoriteCount.textContent);
-            favoriteCount.textContent = count + 1;
-            alert("已收藏！");
-        });
     </script>
 </body>
 </html>
